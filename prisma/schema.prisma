@@ -47,3 +47,21 @@ model AuditLog {
   @@index([userId])
   @@index([action])
 }
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  OUT_OF_SERVICE
+}
+
+model Table {
+  id          String      @id @default(uuid())
+  tableNumber String      @unique
+  name        String?
+  capacity    Int
+  status      TableStatus @default(AVAILABLE)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}

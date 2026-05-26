@@ -13,6 +13,7 @@ const env_config_1 = require("./common/config/env.config");
 const prisma_module_1 = require("./prisma/prisma.module");
 const health_module_1 = require("./modules/health/health.module");
 const auth_module_1 = require("./modules/auth/auth.module");
+const tables_module_1 = require("./modules/tables/tables.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -29,6 +30,7 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             health_module_1.HealthModule,
             auth_module_1.AuthModule,
+            tables_module_1.TablesModule,
         ],
     })
 ], AppModule);
