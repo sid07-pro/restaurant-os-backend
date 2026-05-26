@@ -119,6 +119,7 @@ model Order {
   readyAt              DateTime?
   servedAt             DateTime?
   orderItems           OrderItem[]
+  payment              Payment?
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
 
@@ -141,4 +142,33 @@ model OrderItem {
 
   @@index([orderId])
   @@index([menuItemId])
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  orderId              String        @unique
+  order                Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  amount               Decimal       @db.Decimal(10, 2)
+  paymentMethod        PaymentMethod
+  paymentStatus        PaymentStatus @default(PENDING)
+  transactionReference String?
+  paidAt               DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([paymentStatus])
 }

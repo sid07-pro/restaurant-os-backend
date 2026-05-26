@@ -18,6 +18,7 @@ const categories_module_1 = require("./modules/categories/categories.module");
 const menu_items_module_1 = require("./modules/menu-items/menu-items.module");
 const orders_module_1 = require("./modules/orders/orders.module");
 const kds_module_1 = require("./modules/kds/kds.module");
+const payments_module_1 = require("./modules/payments/payments.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
             menu_items_module_1.MenuItemsModule,
             orders_module_1.OrdersModule,
             kds_module_1.KdsModule,
+            payments_module_1.PaymentsModule,
         ],
     })
 ], AppModule);
