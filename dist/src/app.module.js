@@ -20,6 +20,7 @@ const orders_module_1 = require("./modules/orders/orders.module");
 const kds_module_1 = require("./modules/kds/kds.module");
 const payments_module_1 = require("./modules/payments/payments.module");
 const inventory_module_1 = require("./modules/inventory/inventory.module");
+const customers_module_1 = require("./modules/customers/customers.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,6 +44,7 @@ exports.AppModule = AppModule = __decorate([
             kds_module_1.KdsModule,
             payments_module_1.PaymentsModule,
             inventory_module_1.InventoryModule,
+            customers_module_1.CustomersModule,
         ],
     })
 ], AppModule);
