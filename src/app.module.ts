@@ -11,6 +11,7 @@ import { TablesModule } from './modules/tables/tables.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { MenuItemsModule } from './modules/menu-items/menu-items.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { KdsModule } from './modules/kds/kds.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     CategoriesModule,
     MenuItemsModule,
     OrdersModule,
+    KdsModule,
   ],
 })
 export class AppModule {}

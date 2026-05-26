@@ -12,6 +12,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }>;
     findAll(): Promise<{
@@ -21,6 +26,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }[]>;
     findByTable(tableId: string): Promise<{
@@ -30,6 +40,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }[]>;
     findOne(id: string): Promise<{
@@ -39,6 +54,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }>;
     update(id: string, updateOrderDto: UpdateOrderDto): Promise<{
@@ -48,6 +68,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }>;
     updateStatus(id: string, updateOrderStatusDto: UpdateOrderStatusDto): Promise<{
@@ -57,6 +82,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }>;
     remove(id: string): Promise<{
@@ -66,6 +96,11 @@ export declare class OrdersController {
         updatedAt: Date;
         notes: string | null;
         subtotal: import("@prisma/client-runtime-utils").Decimal;
+        kitchenNotes: string | null;
+        priority: boolean;
+        preparationStartedAt: Date | null;
+        readyAt: Date | null;
+        servedAt: Date | null;
         tableId: string;
     }>;
 }
