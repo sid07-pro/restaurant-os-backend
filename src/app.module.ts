@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { MenuItemsModule } from './modules/menu-items/menu-items.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MenuItemsModule } from './modules/menu-items/menu-items.module';
     TablesModule,
     CategoriesModule,
     MenuItemsModule,
+    OrdersModule,
   ],
 })
 export class AppModule {}

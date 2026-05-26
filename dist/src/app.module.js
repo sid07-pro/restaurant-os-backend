@@ -16,6 +16,7 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const tables_module_1 = require("./modules/tables/tables.module");
 const categories_module_1 = require("./modules/categories/categories.module");
 const menu_items_module_1 = require("./modules/menu-items/menu-items.module");
+const orders_module_1 = require("./modules/orders/orders.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,6 +36,7 @@ exports.AppModule = AppModule = __decorate([
             tables_module_1.TablesModule,
             categories_module_1.CategoriesModule,
             menu_items_module_1.MenuItemsModule,
+            orders_module_1.OrdersModule,
         ],
     })
 ], AppModule);
