@@ -65,3 +65,31 @@ model Table {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  menuItems   MenuItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([name])
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?
+  isAvailable Boolean  @default(true)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([name])
+  @@index([isAvailable])
+}
