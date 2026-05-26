@@ -21,6 +21,7 @@ const kds_module_1 = require("./modules/kds/kds.module");
 const payments_module_1 = require("./modules/payments/payments.module");
 const inventory_module_1 = require("./modules/inventory/inventory.module");
 const customers_module_1 = require("./modules/customers/customers.module");
+const reservations_module_1 = require("./modules/reservations/reservations.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             payments_module_1.PaymentsModule,
             inventory_module_1.InventoryModule,
             customers_module_1.CustomersModule,
+            reservations_module_1.ReservationsModule,
         ],
     })
 ], AppModule);
