@@ -15,6 +15,7 @@ import { KdsModule } from './modules/kds/kds.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { CustomersModule } from './modules/customers/customers.module';
+import { ReservationsModule } from './modules/reservations/reservations.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CustomersModule } from './modules/customers/customers.module';
     PaymentsModule,
     InventoryModule,
     CustomersModule,
+    ReservationsModule,
   ],
 })
 export class AppModule {}
