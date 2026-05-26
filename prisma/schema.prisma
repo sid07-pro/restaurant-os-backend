@@ -16,13 +16,18 @@ enum Role {
   KITCHEN_STAFF
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model User {
   id           String     @id @default(uuid())
   email        String     @unique
   passwordHash String     // Hashed with bcrypt
   name         String
   role         Role       @default(WAITER)
-  status       String     @default("Active") // Active, Inactive
+  status       UserStatus @default(ACTIVE)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   auditLogs    AuditLog[]
