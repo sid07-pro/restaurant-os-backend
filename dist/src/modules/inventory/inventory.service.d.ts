@@ -3,11 +3,15 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 export declare class InventoryService {
     private readonly repo;
     private readonly prisma;
-    constructor(repo: InventoryRepository, prisma: PrismaService);
+    private readonly realtimeService;
+    constructor(repo: InventoryRepository, prisma: PrismaService, realtimeService: RealtimeService);
     private addFlags;
+    private buildInventoryPayload;
+    private emitStockAlerts;
     create(dto: CreateInventoryItemDto): Promise<any>;
     findAll(): Promise<any[]>;
     findOne(id: string): Promise<any>;

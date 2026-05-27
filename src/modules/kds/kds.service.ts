@@ -7,6 +7,7 @@ import {
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateKitchenNotesDto, UpdatePriorityDto } from './dto/kds.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 const ORDER_KDS_INCLUDE = {
   table: true,
@@ -17,7 +18,10 @@ const ORDER_KDS_INCLUDE = {
 
 @Injectable()
 export class KdsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly realtimeService: RealtimeService,
+  ) {}
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -49,6 +53,18 @@ export class KdsService {
         `This action requires order status to be [${allowed.join(' | ')}]. Current status: ${current}`,
       );
     }
+  }
+
+  private buildKdsPayload(order: any) {
+    return {
+      orderId: order.id,
+      tableNumber: order.table?.tableNumber ?? '',
+      status: order.status,
+      preparationStartedAt: order.preparationStartedAt?.toISOString() ?? null,
+      readyAt: order.readyAt?.toISOString() ?? null,
+      servedAt: order.servedAt?.toISOString() ?? null,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   // ─── Public API ───────────────────────────────────────────────────────────
@@ -85,6 +101,10 @@ export class KdsService {
       },
       include: ORDER_KDS_INCLUDE,
     });
+
+    // Emit KDS event
+    this.realtimeService.emitKdsTicketPreparing(this.buildKdsPayload(updated));
+
     return this.formatTicket(updated);
   }
 
@@ -102,6 +122,10 @@ export class KdsService {
       },
       include: ORDER_KDS_INCLUDE,
     });
+
+    // Emit KDS event
+    this.realtimeService.emitKdsTicketReady(this.buildKdsPayload(updated));
+
     return this.formatTicket(updated);
   }
 
@@ -119,6 +143,10 @@ export class KdsService {
       },
       include: ORDER_KDS_INCLUDE,
     });
+
+    // Emit KDS event
+    this.realtimeService.emitKdsTicketServed(this.buildKdsPayload(updated));
+
     return this.formatTicket(updated);
   }
 

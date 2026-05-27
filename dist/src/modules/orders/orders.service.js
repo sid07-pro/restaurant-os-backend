@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const orders_repository_1 = require("./orders.repository");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const realtime_service_1 = require("../realtime/realtime.service");
 const STATUS_TRANSITIONS = {
     OPEN: [client_1.OrderStatus.SENT_TO_KITCHEN, client_1.OrderStatus.CANCELLED],
     SENT_TO_KITCHEN: [client_1.OrderStatus.PREPARING, client_1.OrderStatus.CANCELLED],
@@ -26,9 +27,21 @@ const STATUS_TRANSITIONS = {
 let OrdersService = class OrdersService {
     ordersRepository;
     prisma;
-    constructor(ordersRepository, prisma) {
+    realtimeService;
+    constructor(ordersRepository, prisma, realtimeService) {
         this.ordersRepository = ordersRepository;
         this.prisma = prisma;
+        this.realtimeService = realtimeService;
+    }
+    buildOrderPayload(order) {
+        return {
+            orderId: order.id,
+            tableId: order.tableId,
+            tableNumber: order.table?.tableNumber,
+            status: order.status,
+            subtotal: order.subtotal,
+            timestamp: new Date().toISOString(),
+        };
     }
     async create(dto) {
         const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } });
@@ -69,7 +82,7 @@ let OrdersService = class OrdersService {
                 notes: item.notes,
             };
         });
-        return this.ordersRepository.create({
+        const order = await this.ordersRepository.create({
             table: { connect: { id: dto.tableId } },
             notes: dto.notes,
             subtotal,
@@ -77,6 +90,11 @@ let OrdersService = class OrdersService {
                 create: orderItemsData,
             },
         });
+        this.realtimeService.emitOrderCreated({
+            ...this.buildOrderPayload(order),
+            tableNumber: table.tableNumber,
+        });
+        return order;
     }
     async findAll() {
         return this.ordersRepository.findAll();
@@ -97,7 +115,9 @@ let OrdersService = class OrdersService {
     }
     async update(id, dto) {
         await this.findOne(id);
-        return this.ordersRepository.update(id, { notes: dto.notes });
+        const order = await this.ordersRepository.update(id, { notes: dto.notes });
+        this.realtimeService.emitOrderUpdated(this.buildOrderPayload(order));
+        return order;
     }
     async updateStatus(id, dto) {
         const order = await this.findOne(id);
@@ -108,7 +128,15 @@ let OrdersService = class OrdersService {
             throw new common_1.UnprocessableEntityException(`Cannot transition order from ${currentStatus} to ${newStatus}. ` +
                 `Allowed transitions: [${allowed.join(', ') || 'none'}]`);
         }
-        return this.ordersRepository.update(id, { status: newStatus });
+        const updated = await this.ordersRepository.update(id, { status: newStatus });
+        const payload = this.buildOrderPayload(updated);
+        if (newStatus === client_1.OrderStatus.CANCELLED) {
+            this.realtimeService.emitOrderCancelled(payload);
+        }
+        else {
+            this.realtimeService.emitOrderStatusUpdated(payload);
+        }
+        return updated;
     }
     async remove(id) {
         const order = await this.findOne(id);
@@ -122,6 +150,7 @@ exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [orders_repository_1.OrdersRepository,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        realtime_service_1.RealtimeService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

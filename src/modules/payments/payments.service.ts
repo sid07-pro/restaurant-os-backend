@@ -9,12 +9,14 @@ import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { PaymentsRepository } from './payments.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     private readonly paymentsRepository: PaymentsRepository,
     private readonly prisma: PrismaService,
+    private readonly realtimeService: RealtimeService,
   ) {}
 
   async create(dto: CreatePaymentDto) {
@@ -76,6 +78,15 @@ export class PaymentsService {
       return p;
     });
 
+    // Emit WebSocket event
+    this.realtimeService.emitPaymentCompleted({
+      paymentId: payment.id,
+      orderId: payment.orderId,
+      amount: payment.amount,
+      paymentMethod: payment.paymentMethod,
+      timestamp: new Date().toISOString(),
+    });
+
     return payment;
   }
 
@@ -112,9 +123,20 @@ export class PaymentsService {
       );
     }
 
-    return this.paymentsRepository.update(id, {
+    const refunded = await this.paymentsRepository.update(id, {
       paymentStatus: PaymentStatus.REFUNDED,
     });
+
+    // Emit WebSocket event
+    this.realtimeService.emitPaymentRefunded({
+      paymentId: (refunded as any).id,
+      orderId: (refunded as any).orderId,
+      amount: (refunded as any).amount,
+      paymentMethod: (refunded as any).paymentMethod,
+      timestamp: new Date().toISOString(),
+    });
+
+    return refunded;
   }
 
   async getReceipt(paymentId: string) {

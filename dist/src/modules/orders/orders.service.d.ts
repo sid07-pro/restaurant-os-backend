@@ -3,10 +3,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 export declare class OrdersService {
     private readonly ordersRepository;
     private readonly prisma;
-    constructor(ordersRepository: OrdersRepository, prisma: PrismaService);
+    private readonly realtimeService;
+    constructor(ordersRepository: OrdersRepository, prisma: PrismaService, realtimeService: RealtimeService);
+    private buildOrderPayload;
     create(dto: CreateOrderDto): Promise<{
         id: string;
         status: import("@prisma/client").$Enums.OrderStatus;

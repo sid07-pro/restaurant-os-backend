@@ -1,12 +1,15 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateKitchenNotesDto, UpdatePriorityDto } from './dto/kds.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 export declare class KdsService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly realtimeService;
+    constructor(prisma: PrismaService, realtimeService: RealtimeService);
     private calcPreparationDurationSeconds;
     private formatTicket;
     private findOrder;
     private assertTransition;
+    private buildKdsPayload;
     getActiveTickets(): Promise<any[]>;
     startPreparing(orderId: string): Promise<any>;
     markReady(orderId: string): Promise<any>;

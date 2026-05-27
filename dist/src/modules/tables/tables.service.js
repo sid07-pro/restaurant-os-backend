@@ -12,10 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TablesService = void 0;
 const common_1 = require("@nestjs/common");
 const tables_repository_1 = require("./tables.repository");
+const realtime_service_1 = require("../realtime/realtime.service");
 let TablesService = class TablesService {
     tablesRepository;
-    constructor(tablesRepository) {
+    realtimeService;
+    constructor(tablesRepository, realtimeService) {
         this.tablesRepository = tablesRepository;
+        this.realtimeService = realtimeService;
+    }
+    buildTablePayload(table) {
+        return {
+            tableId: table.id,
+            tableNumber: table.tableNumber,
+            status: table.status,
+            timestamp: new Date().toISOString(),
+        };
     }
     async create(createTableDto) {
         const existingTable = await this.tablesRepository.findByTableNumber(createTableDto.tableNumber);
@@ -46,7 +57,16 @@ let TablesService = class TablesService {
     }
     async changeStatus(id, changeStatusDto) {
         await this.findOne(id);
-        return this.tablesRepository.update(id, { status: changeStatusDto.status });
+        const updated = await this.tablesRepository.update(id, { status: changeStatusDto.status });
+        const payload = this.buildTablePayload(updated);
+        this.realtimeService.emitTableStatusUpdated(payload);
+        if (changeStatusDto.status === 'OCCUPIED') {
+            this.realtimeService.emitTableOccupied(payload);
+        }
+        else if (changeStatusDto.status === 'AVAILABLE') {
+            this.realtimeService.emitTableAvailable(payload);
+        }
+        return updated;
     }
     async remove(id) {
         await this.findOne(id);
@@ -56,6 +76,7 @@ let TablesService = class TablesService {
 exports.TablesService = TablesService;
 exports.TablesService = TablesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [tables_repository_1.TablesRepository])
+    __metadata("design:paramtypes", [tables_repository_1.TablesRepository,
+        realtime_service_1.RealtimeService])
 ], TablesService);
 //# sourceMappingURL=tables.service.js.map

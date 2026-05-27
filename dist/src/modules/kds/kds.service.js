@@ -13,6 +13,7 @@ exports.KdsService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const realtime_service_1 = require("../realtime/realtime.service");
 const ORDER_KDS_INCLUDE = {
     table: true,
     orderItems: {
@@ -21,8 +22,10 @@ const ORDER_KDS_INCLUDE = {
 };
 let KdsService = class KdsService {
     prisma;
-    constructor(prisma) {
+    realtimeService;
+    constructor(prisma, realtimeService) {
         this.prisma = prisma;
+        this.realtimeService = realtimeService;
     }
     calcPreparationDurationSeconds(order) {
         if (!order.preparationStartedAt)
@@ -49,6 +52,17 @@ let KdsService = class KdsService {
         if (!allowed.includes(current)) {
             throw new common_1.UnprocessableEntityException(`This action requires order status to be [${allowed.join(' | ')}]. Current status: ${current}`);
         }
+    }
+    buildKdsPayload(order) {
+        return {
+            orderId: order.id,
+            tableNumber: order.table?.tableNumber ?? '',
+            status: order.status,
+            preparationStartedAt: order.preparationStartedAt?.toISOString() ?? null,
+            readyAt: order.readyAt?.toISOString() ?? null,
+            servedAt: order.servedAt?.toISOString() ?? null,
+            timestamp: new Date().toISOString(),
+        };
     }
     async getActiveTickets() {
         const orders = await this.prisma.order.findMany({
@@ -79,6 +93,7 @@ let KdsService = class KdsService {
             },
             include: ORDER_KDS_INCLUDE,
         });
+        this.realtimeService.emitKdsTicketPreparing(this.buildKdsPayload(updated));
         return this.formatTicket(updated);
     }
     async markReady(orderId) {
@@ -94,6 +109,7 @@ let KdsService = class KdsService {
             },
             include: ORDER_KDS_INCLUDE,
         });
+        this.realtimeService.emitKdsTicketReady(this.buildKdsPayload(updated));
         return this.formatTicket(updated);
     }
     async markServed(orderId) {
@@ -109,6 +125,7 @@ let KdsService = class KdsService {
             },
             include: ORDER_KDS_INCLUDE,
         });
+        this.realtimeService.emitKdsTicketServed(this.buildKdsPayload(updated));
         return this.formatTicket(updated);
     }
     async updateKitchenNotes(orderId, dto) {
@@ -137,6 +154,7 @@ let KdsService = class KdsService {
 exports.KdsService = KdsService;
 exports.KdsService = KdsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        realtime_service_1.RealtimeService])
 ], KdsService);
 //# sourceMappingURL=kds.service.js.map

@@ -3,10 +3,23 @@ import { TablesRepository } from './tables.repository';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 import { ChangeTableStatusDto } from './dto/change-table-status.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class TablesService {
-  constructor(private readonly tablesRepository: TablesRepository) {}
+  constructor(
+    private readonly tablesRepository: TablesRepository,
+    private readonly realtimeService: RealtimeService,
+  ) {}
+
+  private buildTablePayload(table: any) {
+    return {
+      tableId: table.id,
+      tableNumber: table.tableNumber,
+      status: table.status,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   async create(createTableDto: CreateTableDto) {
     const existingTable = await this.tablesRepository.findByTableNumber(createTableDto.tableNumber);
@@ -43,7 +56,19 @@ export class TablesService {
 
   async changeStatus(id: string, changeStatusDto: ChangeTableStatusDto) {
     await this.findOne(id); // Ensure table exists
-    return this.tablesRepository.update(id, { status: changeStatusDto.status });
+    const updated = await this.tablesRepository.update(id, { status: changeStatusDto.status });
+
+    // Emit WebSocket events
+    const payload = this.buildTablePayload(updated);
+    this.realtimeService.emitTableStatusUpdated(payload);
+
+    if (changeStatusDto.status === 'OCCUPIED') {
+      this.realtimeService.emitTableOccupied(payload);
+    } else if (changeStatusDto.status === 'AVAILABLE') {
+      this.realtimeService.emitTableAvailable(payload);
+    }
+
+    return updated;
   }
 
   async remove(id: string) {

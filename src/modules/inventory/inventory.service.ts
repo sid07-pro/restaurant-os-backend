@@ -9,12 +9,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class InventoryService {
   constructor(
     private readonly repo: InventoryRepository,
     private readonly prisma: PrismaService,
+    private readonly realtimeService: RealtimeService,
   ) {}
 
   private addFlags(item: any) {
@@ -25,6 +27,30 @@ export class InventoryService {
       isLowStock: stock > 0 && stock <= min,
       isOutOfStock: stock === 0,
     };
+  }
+
+  private buildInventoryPayload(item: any) {
+    return {
+      inventoryItemId: item.id,
+      name: item.name,
+      currentStock: item.currentStock,
+      minimumStock: item.minimumStock,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  private emitStockAlerts(item: any) {
+    const stock = Number(item.currentStock);
+    const min = Number(item.minimumStock);
+    const payload = this.buildInventoryPayload(item);
+
+    if (stock === 0) {
+      this.realtimeService.emitInventoryOutOfStock(payload);
+    } else if (stock > 0 && stock <= min) {
+      this.realtimeService.emitInventoryLowStock(payload);
+    }
+
+    this.realtimeService.emitInventoryUpdated(payload);
   }
 
   async create(dto: CreateInventoryItemDto) {
@@ -97,6 +123,9 @@ export class InventoryService {
         },
       }),
     ]);
+
+    // Emit inventory alerts
+    this.emitStockAlerts(updated);
 
     return this.addFlags(updated);
   }

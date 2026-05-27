@@ -14,12 +14,15 @@ const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const payments_repository_1 = require("./payments.repository");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const realtime_service_1 = require("../realtime/realtime.service");
 let PaymentsService = class PaymentsService {
     paymentsRepository;
     prisma;
-    constructor(paymentsRepository, prisma) {
+    realtimeService;
+    constructor(paymentsRepository, prisma, realtimeService) {
         this.paymentsRepository = paymentsRepository;
         this.prisma = prisma;
+        this.realtimeService = realtimeService;
     }
     async create(dto) {
         const order = await this.prisma.order.findUnique({
@@ -64,6 +67,13 @@ let PaymentsService = class PaymentsService {
             });
             return p;
         });
+        this.realtimeService.emitPaymentCompleted({
+            paymentId: payment.id,
+            orderId: payment.orderId,
+            amount: payment.amount,
+            paymentMethod: payment.paymentMethod,
+            timestamp: new Date().toISOString(),
+        });
         return payment;
     }
     async findAll() {
@@ -92,9 +102,17 @@ let PaymentsService = class PaymentsService {
         if (payment.paymentStatus !== client_1.PaymentStatus.COMPLETED) {
             throw new common_1.UnprocessableEntityException(`Only COMPLETED payments can be refunded. Current status: ${payment.paymentStatus}`);
         }
-        return this.paymentsRepository.update(id, {
+        const refunded = await this.paymentsRepository.update(id, {
             paymentStatus: client_1.PaymentStatus.REFUNDED,
         });
+        this.realtimeService.emitPaymentRefunded({
+            paymentId: refunded.id,
+            orderId: refunded.orderId,
+            amount: refunded.amount,
+            paymentMethod: refunded.paymentMethod,
+            timestamp: new Date().toISOString(),
+        });
+        return refunded;
     }
     async getReceipt(paymentId) {
         const payment = await this.findOne(paymentId);
@@ -121,6 +139,7 @@ exports.PaymentsService = PaymentsService;
 exports.PaymentsService = PaymentsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [payments_repository_1.PaymentsRepository,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        realtime_service_1.RealtimeService])
 ], PaymentsService);
 //# sourceMappingURL=payments.service.js.map

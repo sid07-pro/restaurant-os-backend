@@ -10,6 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 // Valid forward transitions
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
@@ -27,7 +28,19 @@ export class OrdersService {
   constructor(
     private readonly ordersRepository: OrdersRepository,
     private readonly prisma: PrismaService,
+    private readonly realtimeService: RealtimeService,
   ) {}
+
+  private buildOrderPayload(order: any) {
+    return {
+      orderId: order.id,
+      tableId: order.tableId,
+      tableNumber: order.table?.tableNumber,
+      status: order.status,
+      subtotal: order.subtotal,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   async create(dto: CreateOrderDto) {
     // Validate table exists and is not OUT_OF_SERVICE
@@ -77,7 +90,7 @@ export class OrdersService {
       };
     });
 
-    return this.ordersRepository.create({
+    const order = await this.ordersRepository.create({
       table: { connect: { id: dto.tableId } },
       notes: dto.notes,
       subtotal,
@@ -85,6 +98,14 @@ export class OrdersService {
         create: orderItemsData,
       },
     });
+
+    // Emit WebSocket event
+    this.realtimeService.emitOrderCreated({
+      ...this.buildOrderPayload(order),
+      tableNumber: table.tableNumber,
+    });
+
+    return order;
   }
 
   async findAll() {
@@ -109,7 +130,12 @@ export class OrdersService {
 
   async update(id: string, dto: UpdateOrderDto) {
     await this.findOne(id);
-    return this.ordersRepository.update(id, { notes: dto.notes });
+    const order = await this.ordersRepository.update(id, { notes: dto.notes });
+
+    // Emit WebSocket event
+    this.realtimeService.emitOrderUpdated(this.buildOrderPayload(order));
+
+    return order;
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto) {
@@ -125,7 +151,17 @@ export class OrdersService {
       );
     }
 
-    return this.ordersRepository.update(id, { status: newStatus });
+    const updated = await this.ordersRepository.update(id, { status: newStatus });
+
+    // Emit WebSocket events
+    const payload = this.buildOrderPayload(updated);
+    if (newStatus === OrderStatus.CANCELLED) {
+      this.realtimeService.emitOrderCancelled(payload);
+    } else {
+      this.realtimeService.emitOrderStatusUpdated(payload);
+    }
+
+    return updated;
   }
 
   async remove(id: string) {

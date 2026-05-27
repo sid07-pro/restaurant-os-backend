@@ -2,9 +2,12 @@ import { TablesRepository } from './tables.repository';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
 import { ChangeTableStatusDto } from './dto/change-table-status.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 export declare class TablesService {
     private readonly tablesRepository;
-    constructor(tablesRepository: TablesRepository);
+    private readonly realtimeService;
+    constructor(tablesRepository: TablesRepository, realtimeService: RealtimeService);
+    private buildTablePayload;
     create(createTableDto: CreateTableDto): Promise<{
         name: string | null;
         id: string;

@@ -3,10 +3,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationStatus } from '@prisma/client';
+import { RealtimeService } from '../realtime/realtime.service';
 export declare class ReservationsService {
     private readonly repo;
     private readonly prisma;
-    constructor(repo: ReservationsRepository, prisma: PrismaService);
+    private readonly realtimeService;
+    constructor(repo: ReservationsRepository, prisma: PrismaService, realtimeService: RealtimeService);
+    private buildReservationPayload;
     private checkOverlap;
     create(dto: CreateReservationDto): Promise<{
         table: {

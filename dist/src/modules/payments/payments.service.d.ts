@@ -1,10 +1,12 @@
 import { PaymentsRepository } from './payments.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 export declare class PaymentsService {
     private readonly paymentsRepository;
     private readonly prisma;
-    constructor(paymentsRepository: PaymentsRepository, prisma: PrismaService);
+    private readonly realtimeService;
+    constructor(paymentsRepository: PaymentsRepository, prisma: PrismaService, realtimeService: RealtimeService);
     create(dto: CreatePaymentDto): Promise<{
         order: {
             table: {

@@ -13,12 +13,15 @@ exports.InventoryService = void 0;
 const common_1 = require("@nestjs/common");
 const inventory_repository_1 = require("./inventory.repository");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const realtime_service_1 = require("../realtime/realtime.service");
 let InventoryService = class InventoryService {
     repo;
     prisma;
-    constructor(repo, prisma) {
+    realtimeService;
+    constructor(repo, prisma, realtimeService) {
         this.repo = repo;
         this.prisma = prisma;
+        this.realtimeService = realtimeService;
     }
     addFlags(item) {
         const stock = Number(item.currentStock);
@@ -28,6 +31,27 @@ let InventoryService = class InventoryService {
             isLowStock: stock > 0 && stock <= min,
             isOutOfStock: stock === 0,
         };
+    }
+    buildInventoryPayload(item) {
+        return {
+            inventoryItemId: item.id,
+            name: item.name,
+            currentStock: item.currentStock,
+            minimumStock: item.minimumStock,
+            timestamp: new Date().toISOString(),
+        };
+    }
+    emitStockAlerts(item) {
+        const stock = Number(item.currentStock);
+        const min = Number(item.minimumStock);
+        const payload = this.buildInventoryPayload(item);
+        if (stock === 0) {
+            this.realtimeService.emitInventoryOutOfStock(payload);
+        }
+        else if (stock > 0 && stock <= min) {
+            this.realtimeService.emitInventoryLowStock(payload);
+        }
+        this.realtimeService.emitInventoryUpdated(payload);
     }
     async create(dto) {
         const existing = await this.repo.findBySku(dto.sku);
@@ -86,6 +110,7 @@ let InventoryService = class InventoryService {
                 },
             }),
         ]);
+        this.emitStockAlerts(updated);
         return this.addFlags(updated);
     }
     async getMovements(id) {
@@ -97,6 +122,7 @@ exports.InventoryService = InventoryService;
 exports.InventoryService = InventoryService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [inventory_repository_1.InventoryRepository,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        realtime_service_1.RealtimeService])
 ], InventoryService);
 //# sourceMappingURL=inventory.service.js.map

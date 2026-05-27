@@ -13,12 +13,26 @@ exports.ReservationsService = void 0;
 const common_1 = require("@nestjs/common");
 const reservations_repository_1 = require("./reservations.repository");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const realtime_service_1 = require("../realtime/realtime.service");
 let ReservationsService = class ReservationsService {
     repo;
     prisma;
-    constructor(repo, prisma) {
+    realtimeService;
+    constructor(repo, prisma, realtimeService) {
         this.repo = repo;
         this.prisma = prisma;
+        this.realtimeService = realtimeService;
+    }
+    buildReservationPayload(reservation) {
+        return {
+            reservationId: reservation.id,
+            customerId: reservation.customerId,
+            tableId: reservation.tableId,
+            status: reservation.status,
+            guestCount: reservation.guestCount,
+            reservationTime: reservation.reservationTime?.toISOString?.() ?? reservation.reservationTime,
+            timestamp: new Date().toISOString(),
+        };
     }
     async checkOverlap(tableId, time, duration, excludeReservationId) {
         const active = await this.repo.findActiveReservationsByTable(tableId);
@@ -64,7 +78,7 @@ let ReservationsService = class ReservationsService {
         if (hasOverlap) {
             throw new common_1.ConflictException('Overlapping active reservation exists for this table');
         }
-        return this.repo.create({
+        const reservation = await this.repo.create({
             customerId: dto.customerId,
             tableId: dto.tableId,
             reservationTime,
@@ -72,6 +86,8 @@ let ReservationsService = class ReservationsService {
             guestCount: dto.guestCount,
             notes: dto.notes,
         });
+        this.realtimeService.emitReservationCreated(this.buildReservationPayload(reservation));
+        return reservation;
     }
     async findAll(filters = {}) {
         return this.repo.findAll(filters);
@@ -149,7 +165,23 @@ let ReservationsService = class ReservationsService {
                 data: { status: 'AVAILABLE' },
             });
         }
-        return this.repo.update(id, { status });
+        const updated = await this.repo.update(id, { status });
+        const payload = this.buildReservationPayload(updated);
+        switch (status) {
+            case 'CONFIRMED':
+                this.realtimeService.emitReservationConfirmed(payload);
+                break;
+            case 'SEATED':
+                this.realtimeService.emitReservationSeated(payload);
+                break;
+            case 'COMPLETED':
+                this.realtimeService.emitReservationCompleted(payload);
+                break;
+            case 'CANCELLED':
+                this.realtimeService.emitReservationCancelled(payload);
+                break;
+        }
+        return updated;
     }
     async remove(id) {
         await this.findOne(id);
@@ -181,6 +213,7 @@ exports.ReservationsService = ReservationsService;
 exports.ReservationsService = ReservationsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [reservations_repository_1.ReservationsRepository,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        realtime_service_1.RealtimeService])
 ], ReservationsService);
 //# sourceMappingURL=reservations.service.js.map

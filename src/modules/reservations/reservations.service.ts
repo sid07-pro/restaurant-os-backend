@@ -10,13 +10,27 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationStatus } from '@prisma/client';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class ReservationsService {
   constructor(
     private readonly repo: ReservationsRepository,
     private readonly prisma: PrismaService,
+    private readonly realtimeService: RealtimeService,
   ) {}
+
+  private buildReservationPayload(reservation: any) {
+    return {
+      reservationId: reservation.id,
+      customerId: reservation.customerId,
+      tableId: reservation.tableId,
+      status: reservation.status,
+      guestCount: reservation.guestCount,
+      reservationTime: reservation.reservationTime?.toISOString?.() ?? reservation.reservationTime,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   private async checkOverlap(
     tableId: string,
@@ -88,7 +102,7 @@ export class ReservationsService {
     }
 
     // 7. Save
-    return this.repo.create({
+    const reservation = await this.repo.create({
       customerId: dto.customerId,
       tableId: dto.tableId,
       reservationTime,
@@ -96,6 +110,11 @@ export class ReservationsService {
       guestCount: dto.guestCount,
       notes: dto.notes,
     });
+
+    // Emit WebSocket event
+    this.realtimeService.emitReservationCreated(this.buildReservationPayload(reservation));
+
+    return reservation;
   }
 
   async findAll(filters: {
@@ -197,7 +216,26 @@ export class ReservationsService {
       });
     }
 
-    return this.repo.update(id, { status });
+    const updated = await this.repo.update(id, { status });
+
+    // Emit WebSocket events based on new status
+    const payload = this.buildReservationPayload(updated);
+    switch (status) {
+      case 'CONFIRMED':
+        this.realtimeService.emitReservationConfirmed(payload);
+        break;
+      case 'SEATED':
+        this.realtimeService.emitReservationSeated(payload);
+        break;
+      case 'COMPLETED':
+        this.realtimeService.emitReservationCompleted(payload);
+        break;
+      case 'CANCELLED':
+        this.realtimeService.emitReservationCancelled(payload);
+        break;
+    }
+
+    return updated;
   }
 
   async remove(id: string) {
