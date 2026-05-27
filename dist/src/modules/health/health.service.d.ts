@@ -1,14 +1,7 @@
-import { HealthService } from './health.service';
-export declare class HealthController {
-    private readonly healthService;
-    constructor(healthService: HealthService);
-    getHealth(): {
-        status: string;
-        timestamp: string;
-        uptime: number;
-        version: string;
-        environment: string;
-    };
+import { PrismaService } from '../../prisma/prisma.service';
+export declare class HealthService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
     getLiveness(): {
         status: string;
         timestamp: string;
@@ -25,4 +18,11 @@ export declare class HealthController {
         };
         cpuLoad: number[];
     }>;
+    getDetailedHealth(): {
+        status: string;
+        timestamp: string;
+        uptime: number;
+        version: string;
+        environment: string;
+    };
 }

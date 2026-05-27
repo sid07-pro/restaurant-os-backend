@@ -9,6 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const throttler_1 = require("@nestjs/throttler");
+const core_1 = require("@nestjs/core");
 const env_config_1 = require("./common/config/env.config");
 const prisma_module_1 = require("./prisma/prisma.module");
 const health_module_1 = require("./modules/health/health.module");
@@ -32,10 +34,21 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
+                envFilePath: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env',
                 validationSchema: env_config_1.envValidationSchema,
                 validationOptions: {
                     abortEarly: true,
                 },
+            }),
+            throttler_1.ThrottlerModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: (config) => [
+                    {
+                        ttl: parseInt(config.get('RATE_LIMIT_GLOBAL_TTL') || '60000', 10),
+                        limit: parseInt(config.get('RATE_LIMIT_GLOBAL_LIMIT') || '100', 10),
+                    },
+                ],
             }),
             prisma_module_1.PrismaModule,
             health_module_1.HealthModule,
@@ -51,6 +64,12 @@ exports.AppModule = AppModule = __decorate([
             reservations_module_1.ReservationsModule,
             reports_module_1.ReportsModule,
             realtime_module_1.RealtimeModule,
+        ],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: throttler_1.ThrottlerGuard,
+            },
         ],
     })
 ], AppModule);

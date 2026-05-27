@@ -1,16 +1,22 @@
-// src/modules/health/health.controller.ts
-
 import { Controller, Get } from '@nestjs/common';
+import { HealthService } from './health.service';
 
-@Controller('health')
+@Controller({ path: 'health', version: '1' })
 export class HealthController {
+  constructor(private readonly healthService: HealthService) {}
+
   @Get()
   getHealth() {
-    return {
-      status: 'UP',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      version: '1.0.0',
-    };
+    return this.healthService.getDetailedHealth();
+  }
+
+  @Get('live')
+  getLiveness() {
+    return this.healthService.getLiveness();
+  }
+
+  @Get('ready')
+  async getReadiness() {
+    return this.healthService.getReadiness();
   }
 }

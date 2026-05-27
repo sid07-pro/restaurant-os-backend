@@ -31,11 +31,16 @@ let AllExceptionsFilter = class AllExceptionsFilter {
         const message = typeof exceptionResponse === 'object' && exceptionResponse !== null
             ? exceptionResponse.message || JSON.stringify(exceptionResponse)
             : exceptionResponse;
+        const isProduction = process.env.NODE_ENV === 'production';
+        const safeMessage = isProduction && httpStatus === common_1.HttpStatus.INTERNAL_SERVER_ERROR
+            ? 'Internal server error'
+            : message;
         const responseBody = {
             statusCode: httpStatus,
             timestamp: new Date().toISOString(),
             path: httpAdapter.getRequestUrl(ctx.getRequest()),
-            message,
+            message: safeMessage,
+            ...(isProduction ? {} : { stack: exception instanceof Error ? exception.stack : undefined }),
         };
         this.logger.error(`Exception thrown at ${responseBody.path}: ${exception instanceof Error ? exception.message : JSON.stringify(exception)}`, exception instanceof Error ? exception.stack : undefined);
         httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);

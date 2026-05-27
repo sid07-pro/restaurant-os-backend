@@ -10,29 +10,51 @@ exports.CentralizedLogger = void 0;
 const common_1 = require("@nestjs/common");
 let CentralizedLogger = class CentralizedLogger extends common_1.ConsoleLogger {
     log(message, context) {
-        const formatted = this.formatJsonMessage('INFO', message, context);
-        super.log(formatted);
+        this.printLog('INFO', message, context, () => super.log(message, context));
     }
     error(message, stack, context) {
-        const formatted = this.formatJsonMessage('ERROR', message, context);
-        super.error(formatted, stack);
+        this.printLog('ERROR', message, context, () => super.error(message, stack, context), stack);
     }
     warn(message, context) {
-        const formatted = this.formatJsonMessage('WARN', message, context);
-        super.warn(formatted);
+        this.printLog('WARN', message, context, () => super.warn(message, context));
     }
     debug(message, context) {
-        const formatted = this.formatJsonMessage('DEBUG', message, context);
-        super.debug(formatted);
+        this.printLog('DEBUG', message, context, () => super.debug(message, context));
     }
     verbose(message, context) {
-        const formatted = this.formatJsonMessage('VERBOSE', message, context);
-        super.verbose(formatted);
+        this.printLog('VERBOSE', message, context, () => super.verbose(message, context));
     }
-    formatJsonMessage(level, message, context) {
-        const timestamp = new Date().toISOString();
-        const msg = typeof message === 'object' ? JSON.stringify(message) : message;
-        return `{"time":"${timestamp}","level":"${level}","context":"${context || 'App'}","message":"${msg}"}`;
+    printLog(level, message, context, fallbackFn, stack) {
+        if (process.env.NODE_ENV === 'production') {
+            let parsedMsg = message;
+            if (message instanceof Error) {
+                parsedMsg = message.message;
+                stack = stack || message.stack;
+            }
+            else if (typeof message === 'string') {
+                try {
+                    parsedMsg = JSON.parse(message);
+                }
+                catch {
+                }
+            }
+            const logObj = {
+                time: new Date().toISOString(),
+                level,
+                context: context || 'App',
+                message: typeof parsedMsg === 'string' ? parsedMsg : undefined,
+            };
+            if (typeof parsedMsg === 'object' && parsedMsg !== null) {
+                Object.assign(logObj, parsedMsg);
+            }
+            if (stack) {
+                logObj.stack = stack;
+            }
+            process.stdout.write(JSON.stringify(logObj) + '\n');
+        }
+        else {
+            fallbackFn?.();
+        }
     }
 };
 exports.CentralizedLogger = CentralizedLogger;

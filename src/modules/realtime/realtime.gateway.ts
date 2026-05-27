@@ -8,7 +8,7 @@ import {
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleDestroy } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -30,7 +30,7 @@ const VALID_ROOMS = ['dashboard', 'kds', 'tables', 'reservations', 'inventory'];
   namespace: '/',
 })
 export class RealtimeGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy
 {
   private readonly logger = new Logger(RealtimeGateway.name);
 
@@ -46,6 +46,11 @@ export class RealtimeGateway
   afterInit(server: Server) {
     this.realtimeService.setServer(server);
     this.logger.log('WebSocket Gateway initialized');
+  }
+
+  onModuleDestroy() {
+    this.logger.log('Disconnecting all WebSocket clients for graceful shutdown...');
+    this.server?.disconnectSockets(true);
   }
 
   async handleConnection(client: Socket) {

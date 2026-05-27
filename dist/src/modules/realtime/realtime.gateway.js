@@ -43,6 +43,10 @@ let RealtimeGateway = RealtimeGateway_1 = class RealtimeGateway {
         this.realtimeService.setServer(server);
         this.logger.log('WebSocket Gateway initialized');
     }
+    onModuleDestroy() {
+        this.logger.log('Disconnecting all WebSocket clients for graceful shutdown...');
+        this.server?.disconnectSockets(true);
+    }
     async handleConnection(client) {
         try {
             const token = client.handshake.auth?.token ||

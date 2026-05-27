@@ -35,11 +35,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? (exceptionResponse as any).message || JSON.stringify(exceptionResponse)
         : exceptionResponse;
 
+    const isProduction = process.env.NODE_ENV === 'production';
+    const safeMessage = isProduction && httpStatus === HttpStatus.INTERNAL_SERVER_ERROR 
+      ? 'Internal server error' 
+      : message;
+
     const responseBody = {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      message,
+      message: safeMessage,
+      // Only include stack trace if not in production
+      ...(isProduction ? {} : { stack: exception instanceof Error ? exception.stack : undefined }),
     };
 
     // Structured pino-style JSON logging

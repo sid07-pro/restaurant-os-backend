@@ -45,5 +45,11 @@ exports.envValidationSchema = Joi.object({
     JWT_ACCESS_EXPIRES: Joi.string().default('15m'),
     JWT_REFRESH_EXPIRES: Joi.string().default('7d'),
     CORS_ORIGINS: Joi.string().default('*'),
+    RATE_LIMIT_GLOBAL_TTL: Joi.number().default(60000),
+    RATE_LIMIT_GLOBAL_LIMIT: Joi.number().default(100),
+    RATE_LIMIT_AUTH_TTL: Joi.number().default(60000),
+    RATE_LIMIT_AUTH_LIMIT: Joi.number().default(5),
+    RATE_LIMIT_WS_TTL: Joi.number().default(60000),
+    RATE_LIMIT_WS_LIMIT: Joi.number().default(10),
 });
 //# sourceMappingURL=env.config.js.map

@@ -11,14 +11,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HealthController = void 0;
 const common_1 = require("@nestjs/common");
+const health_service_1 = require("./health.service");
 let HealthController = class HealthController {
+    healthService;
+    constructor(healthService) {
+        this.healthService = healthService;
+    }
     getHealth() {
-        return {
-            status: 'UP',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime(),
-            version: '1.0.0',
-        };
+        return this.healthService.getDetailedHealth();
+    }
+    getLiveness() {
+        return this.healthService.getLiveness();
+    }
+    async getReadiness() {
+        return this.healthService.getReadiness();
     }
 };
 exports.HealthController = HealthController;
@@ -28,7 +34,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], HealthController.prototype, "getHealth", null);
+__decorate([
+    (0, common_1.Get)('live'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HealthController.prototype, "getLiveness", null);
+__decorate([
+    (0, common_1.Get)('ready'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "getReadiness", null);
 exports.HealthController = HealthController = __decorate([
-    (0, common_1.Controller)('health')
+    (0, common_1.Controller)({ path: 'health', version: '1' }),
+    __metadata("design:paramtypes", [health_service_1.HealthService])
 ], HealthController);
 //# sourceMappingURL=health.controller.js.map

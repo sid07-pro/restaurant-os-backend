@@ -1,9 +1,10 @@
 import { OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { OnModuleDestroy } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RealtimeService } from './realtime.service';
-export declare class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export declare class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy {
     private readonly jwtService;
     private readonly configService;
     private readonly realtimeService;
@@ -11,6 +12,7 @@ export declare class RealtimeGateway implements OnGatewayInit, OnGatewayConnecti
     server: Server;
     constructor(jwtService: JwtService, configService: ConfigService, realtimeService: RealtimeService);
     afterInit(server: Server): void;
+    onModuleDestroy(): void;
     handleConnection(client: Socket): Promise<void>;
     handleDisconnect(client: Socket): void;
     handleSubscribe(client: Socket, data: {

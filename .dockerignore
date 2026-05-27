@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules
+dist
+test
+docker-compose*.yml
+.env*
+! .env.example
+README.md
+*.md
+coverage
+logs
+npm-debug.log
+yarn-error.log

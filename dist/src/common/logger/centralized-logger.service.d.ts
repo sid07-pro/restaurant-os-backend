@@ -5,5 +5,5 @@ export declare class CentralizedLogger extends ConsoleLogger implements LoggerSe
     warn(message: any, context?: string): void;
     debug(message: any, context?: string): void;
     verbose(message: any, context?: string): void;
-    private formatJsonMessage;
+    private printLog;
 }
