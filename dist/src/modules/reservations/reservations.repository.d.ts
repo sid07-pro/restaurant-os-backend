@@ -4,38 +4,38 @@ export declare class ReservationsRepository {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(data: Prisma.ReservationUncheckedCreateInput): Promise<{
-        customer: {
+        table: {
+            name: string | null;
             id: string;
+            status: import("@prisma/client").$Enums.TableStatus;
             createdAt: Date;
             updatedAt: Date;
+            tableNumber: string;
+            capacity: number;
+            notes: string | null;
+        };
+        customer: {
             name: string;
-            phone: string;
+            id: string;
             email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
             loyaltyPoints: number;
             totalVisits: number;
             totalSpent: Prisma.Decimal;
         };
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            notes: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string | null;
-            tableNumber: string;
-            capacity: number;
-        };
     } & {
         id: string;
+        status: import("@prisma/client").$Enums.ReservationStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        notes: string | null;
+        tableId: string;
         reservationTime: Date;
         estimatedDurationMinutes: number;
         guestCount: number;
-        status: import("@prisma/client").$Enums.ReservationStatus;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         customerId: string;
-        tableId: string;
     }>;
     findAll(filters?: {
         status?: ReservationStatus;
@@ -43,151 +43,151 @@ export declare class ReservationsRepository {
         tableId?: string;
         date?: string;
     }): Promise<({
-        customer: {
+        table: {
+            name: string | null;
             id: string;
+            status: import("@prisma/client").$Enums.TableStatus;
             createdAt: Date;
             updatedAt: Date;
+            tableNumber: string;
+            capacity: number;
+            notes: string | null;
+        };
+        customer: {
             name: string;
-            phone: string;
+            id: string;
             email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
             loyaltyPoints: number;
             totalVisits: number;
             totalSpent: Prisma.Decimal;
         };
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            notes: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string | null;
-            tableNumber: string;
-            capacity: number;
-        };
     } & {
         id: string;
+        status: import("@prisma/client").$Enums.ReservationStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        notes: string | null;
+        tableId: string;
         reservationTime: Date;
         estimatedDurationMinutes: number;
         guestCount: number;
-        status: import("@prisma/client").$Enums.ReservationStatus;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         customerId: string;
-        tableId: string;
     })[]>;
     findById(id: string): Promise<({
-        customer: {
+        table: {
+            name: string | null;
             id: string;
+            status: import("@prisma/client").$Enums.TableStatus;
             createdAt: Date;
             updatedAt: Date;
+            tableNumber: string;
+            capacity: number;
+            notes: string | null;
+        };
+        customer: {
             name: string;
-            phone: string;
+            id: string;
             email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
             loyaltyPoints: number;
             totalVisits: number;
             totalSpent: Prisma.Decimal;
         };
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            notes: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string | null;
-            tableNumber: string;
-            capacity: number;
-        };
     } & {
         id: string;
+        status: import("@prisma/client").$Enums.ReservationStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        notes: string | null;
+        tableId: string;
         reservationTime: Date;
         estimatedDurationMinutes: number;
         guestCount: number;
-        status: import("@prisma/client").$Enums.ReservationStatus;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         customerId: string;
-        tableId: string;
     }) | null>;
     update(id: string, data: Prisma.ReservationUncheckedUpdateInput): Promise<{
-        customer: {
+        table: {
+            name: string | null;
             id: string;
+            status: import("@prisma/client").$Enums.TableStatus;
             createdAt: Date;
             updatedAt: Date;
+            tableNumber: string;
+            capacity: number;
+            notes: string | null;
+        };
+        customer: {
             name: string;
-            phone: string;
+            id: string;
             email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
             loyaltyPoints: number;
             totalVisits: number;
             totalSpent: Prisma.Decimal;
         };
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            notes: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string | null;
-            tableNumber: string;
-            capacity: number;
-        };
     } & {
         id: string;
+        status: import("@prisma/client").$Enums.ReservationStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        notes: string | null;
+        tableId: string;
         reservationTime: Date;
         estimatedDurationMinutes: number;
         guestCount: number;
-        status: import("@prisma/client").$Enums.ReservationStatus;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         customerId: string;
-        tableId: string;
     }>;
     delete(id: string): Promise<{
-        customer: {
+        table: {
+            name: string | null;
             id: string;
+            status: import("@prisma/client").$Enums.TableStatus;
             createdAt: Date;
             updatedAt: Date;
+            tableNumber: string;
+            capacity: number;
+            notes: string | null;
+        };
+        customer: {
             name: string;
-            phone: string;
+            id: string;
             email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
             loyaltyPoints: number;
             totalVisits: number;
             totalSpent: Prisma.Decimal;
         };
-        table: {
-            id: string;
-            status: import("@prisma/client").$Enums.TableStatus;
-            notes: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string | null;
-            tableNumber: string;
-            capacity: number;
-        };
     } & {
         id: string;
+        status: import("@prisma/client").$Enums.ReservationStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        notes: string | null;
+        tableId: string;
         reservationTime: Date;
         estimatedDurationMinutes: number;
         guestCount: number;
-        status: import("@prisma/client").$Enums.ReservationStatus;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         customerId: string;
-        tableId: string;
     }>;
     findActiveReservationsByTable(tableId: string): Promise<{
         id: string;
+        status: import("@prisma/client").$Enums.ReservationStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        notes: string | null;
+        tableId: string;
         reservationTime: Date;
         estimatedDurationMinutes: number;
         guestCount: number;
-        status: import("@prisma/client").$Enums.ReservationStatus;
-        notes: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         customerId: string;
-        tableId: string;
     }[]>;
 }

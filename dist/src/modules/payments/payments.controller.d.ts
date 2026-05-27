@@ -24,10 +24,10 @@ export declare class PaymentsController {
                 id: string;
                 createdAt: Date;
                 notes: string | null;
+                menuItemId: string;
                 quantity: number;
                 unitPrice: import("@prisma/client-runtime-utils").Decimal;
                 lineTotal: import("@prisma/client-runtime-utils").Decimal;
-                menuItemId: string;
                 orderId: string;
             })[];
         } & {
