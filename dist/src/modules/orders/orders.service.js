@@ -85,14 +85,23 @@ let OrdersService = class OrdersService {
         const order = await this.ordersRepository.create({
             table: { connect: { id: dto.tableId } },
             notes: dto.notes,
+            status: 'SENT_TO_KITCHEN',
             subtotal,
             orderItems: {
                 create: orderItemsData,
             },
         });
+        const updatedTable = await this.prisma.table.update({
+            where: { id: dto.tableId },
+            data: { status: 'OCCUPIED' },
+        });
         this.realtimeService.emitOrderCreated({
             ...this.buildOrderPayload(order),
             tableNumber: table.tableNumber,
+        });
+        this.realtimeService.emitTableStatusUpdated({
+            tableId: updatedTable.id,
+            status: updatedTable.status,
         });
         return order;
     }

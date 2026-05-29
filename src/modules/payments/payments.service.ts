@@ -75,7 +75,18 @@ export class PaymentsService {
         data: { status: OrderStatus.COMPLETED },
       });
 
+      await tx.table.update({
+        where: { id: p.order.tableId },
+        data: { status: 'AVAILABLE' },
+      });
+
       return p;
+    });
+
+    // Notify realtime service about table update
+    this.realtimeService.emitTableStatusUpdated({
+      tableId: payment.order.tableId,
+      status: 'AVAILABLE',
     });
 
     // Emit WebSocket event

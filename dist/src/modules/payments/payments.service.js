@@ -65,7 +65,15 @@ let PaymentsService = class PaymentsService {
                 where: { id: dto.orderId },
                 data: { status: client_1.OrderStatus.COMPLETED },
             });
+            await tx.table.update({
+                where: { id: p.order.tableId },
+                data: { status: 'AVAILABLE' },
+            });
             return p;
+        });
+        this.realtimeService.emitTableStatusUpdated({
+            tableId: payment.order.tableId,
+            status: 'AVAILABLE',
         });
         this.realtimeService.emitPaymentCompleted({
             paymentId: payment.id,

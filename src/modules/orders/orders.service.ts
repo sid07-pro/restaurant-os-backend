@@ -93,16 +93,29 @@ export class OrdersService {
     const order = await this.ordersRepository.create({
       table: { connect: { id: dto.tableId } },
       notes: dto.notes,
+      status: 'SENT_TO_KITCHEN',
       subtotal,
       orderItems: {
         create: orderItemsData,
       },
     });
 
+    // Auto-update table status
+    const updatedTable = await this.prisma.table.update({
+      where: { id: dto.tableId },
+      data: { status: 'OCCUPIED' },
+    });
+
     // Emit WebSocket event
     this.realtimeService.emitOrderCreated({
       ...this.buildOrderPayload(order),
       tableNumber: table.tableNumber,
+    });
+    
+    // Alert realtime service about table update
+    this.realtimeService.emitTableStatusUpdated({
+      tableId: updatedTable.id,
+      status: updatedTable.status,
     });
 
     return order;
