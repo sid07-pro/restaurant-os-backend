@@ -115,7 +115,9 @@ export class OrdersService {
     // Alert realtime service about table update
     this.realtimeService.emitTableStatusUpdated({
       tableId: updatedTable.id,
+      tableNumber: table.tableNumber,
       status: updatedTable.status,
+      timestamp: new Date().toISOString(),
     });
 
     return order;

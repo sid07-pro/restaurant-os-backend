@@ -73,7 +73,9 @@ let PaymentsService = class PaymentsService {
         });
         this.realtimeService.emitTableStatusUpdated({
             tableId: payment.order.tableId,
+            tableNumber: payment.order.table?.tableNumber || 'Unknown',
             status: 'AVAILABLE',
+            timestamp: new Date().toISOString(),
         });
         this.realtimeService.emitPaymentCompleted({
             paymentId: payment.id,

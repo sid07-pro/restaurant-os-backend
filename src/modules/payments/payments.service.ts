@@ -86,7 +86,9 @@ export class PaymentsService {
     // Notify realtime service about table update
     this.realtimeService.emitTableStatusUpdated({
       tableId: payment.order.tableId,
+      tableNumber: payment.order.table?.tableNumber || 'Unknown',
       status: 'AVAILABLE',
+      timestamp: new Date().toISOString(),
     });
 
     // Emit WebSocket event
